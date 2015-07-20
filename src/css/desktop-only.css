@@ -1,6 +1,12 @@
 .draggable {
   -webkit-app-region: drag; }
 
+.tabbedContent {
+  height: calc(100vh - 128px); }
+
+.untabbedContent {
+  height: calc(100vh - 64px); }
+
 #menuButton md-icon {
   opacity: 0.95; }
 

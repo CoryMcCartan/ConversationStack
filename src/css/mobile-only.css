@@ -1,3 +1,10 @@
+.tabbedContent {
+  height: calc(100vh - 64px); }
 
+.untabbedContent {
+  height: 100vh; }
+
+#close {
+  display: none; }
 
 /*# sourceMappingURL=mobile-only.css.map */

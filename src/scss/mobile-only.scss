@@ -1,0 +1,11 @@
+// HEIGHT ADJUSTMENTS FOR SCROLL SHRINK
+.tabbedContent {
+	height: calc(100vh - 64px);
+}
+.untabbedContent {
+	height: 100vh;
+}
+// HIDE CLOSE BUTTON ON MOBILE
+#close {
+	display: none;
+}

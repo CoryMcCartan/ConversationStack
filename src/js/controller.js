@@ -1,6 +1,8 @@
 /*
  * UI EVENTS, SETUP, ETC
  */
+/* global model, Colors */
+
 var UI = {
 	isClosed: true, // whether side menu is closed
 	prepped: false, // whether an open was prepped
@@ -119,7 +121,7 @@ function menuTouch(e) {
 }
 
 function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
-	  $scope.topics = model.topics;
+	$scope.topics = model.topics;
 	$scope.agenda = model.agenda;
 	$scope.settings = model.settings;
 	
@@ -135,7 +137,7 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
 				model.saveSettings();
 				break;
 		}
-		if (name == "CLOSE") { // if we're just closing the app don't bother changing views
+		if (name === "CLOSE") { // if we're just closing the app don't bother changing views
 			return;
 		}
 		$("#view_"+ UI.current).style.display = "";
@@ -159,7 +161,7 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
 		UI.isClosed = true;
 	}, 50);
 	
-	$scope.connectListeners = scrollListeners;
+	$scope.connectListeners = NULLF;//scrollListeners;
 	
 	$scope.styleCurrentView = function(view) {
 		var styleobj = {};
@@ -169,15 +171,23 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
 		return styleobj;
 	};
 	$scope.getColor = function(view) {
-		var ret = {"color": Colors[view]};
+		var ret = {"color": Colors[view].primary};
 		if (view === "review") ret.color = "#ffc107";
 		return ret;
+	};
+	$scope.getRandomColor = function(index) {
+		var colors = ["#e77", "#4e8", "#9af", "#fe6", "#bbb"];
+		//return {"background-color": colors[(Math.random() * colors.length)|0]};
+		return {"background-color": colors[index]};
+	};
+	$scope.itemClass = function(item) {
+		return item.done ? "item-done" : "";
 	};
 
 	$scope.toast = function(text, action) {
 		var toast = $mdToast.simple();
 		toast.content(text);
-		if (action) toast.action(action)
+		if (action) toast.action(action);
 		$mdToast.show(toast);	
 	};
 	

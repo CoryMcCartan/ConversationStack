@@ -1,0 +1,25 @@
+.topic-item.ng-enter, .topic-item.ng-leave, .topic-item.ng-move {
+  transition: 500ms cubic-bezier(0.25, 0.8, 0.25, 1) all; }
+
+.topic-item.ng-enter, .topic-item.ng-leave.ng-leave-active {
+  transform: translateY(-130%);
+  margin-bottom: -84px;
+  opacity: 0.5; }
+
+.topic-item.ng-enter.ng-enter-active, .topic-item.ng-leave {
+  transform: translateY(0);
+  margin-bottom: 8px;
+  opacity: 1; }
+
+.agenda-item.ng-enter, .agenda-item.ng-leave, .agenda-item.ng-move {
+  transition: 500ms cubic-bezier(0.25, 0.8, 0.25, 1) all; }
+
+.agenda-item.ng-enter, .agenda-item.ng-leave.ng-leave-active {
+  opacity: 0;
+  transform: translateY(100%); }
+
+.agenda-item.ng-enter.ng-enter-active, .agenda-item.ng-leave {
+  opacity: 1;
+  transform: translateY(0); }
+
+/*# sourceMappingURL=animations.css.map */

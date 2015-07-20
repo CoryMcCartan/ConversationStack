@@ -3,6 +3,14 @@
 	-webkit-app-region: drag;
 }
 
+// SCROLL SHRINK
+.tabbedContent {
+	height: calc(100vh - 128px);
+}
+.untabbedContent {
+	height: calc(100vh - 64px);
+}
+
 // DIMMER ICON BUTTONS, BRIGHTEN ON HOVER
 #menuButton md-icon{
 	opacity: 0.95;

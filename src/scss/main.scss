@@ -4,78 +4,25 @@ body {
 	font-size: $font-size;
 }
 
+// ITEMS
+.topic-item, .agenda-item {
+	font-size: 44px;
+	line-height: 44px;
+	font-weight: 300;
+}
+.topic-item md-card-content, .agenda-item md-card-content {
+	background-color: #eee;
+}
+
+// AGENDA ITEMS MARKED AS DONE
+.item-done {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
 // HIDES VIEWS THAT AREN'T ACTIVE
 .view {
 	display: none;
 }
 
-// FIX WEIRD ROUNDING OF TABS
-md-tabs {
-	border-radius: 0;
-}
 
-// FIX WEIRD OUTLINE OF CONTENT
-md-content {
-	outline: none;
-}
-
-// SMOOTH SLIDING
-md-sidenav {
-	transition: 200ms all;
-}
-
-// PADDED DIVIDER 
-.md-divider {
-	margin: 0.6em 0;
-}
-
-// BOLD MENU ICONS
-md-sidenav md-list md-list-item button.md-no-style {
-	font-weight: inherit;
-}
-
-// SHADOW AROUND TABS
-md-tabs.md-whiteframe-z2 md-tabs-wrapper {
-	box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.14), 0 4px 5px 0 rgba(0, 0, 0, 0.098), 0 1px 10px 0 rgba(0, 0, 0, 0.084);
-	z-index: 2;
-}
-md-tabs.md-whiteframe-z1 md-tabs-wrapper {
-	box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.14), 0px 2px 2px 0px rgba(0, 0, 0, 0.098), 0px 1px 5px 0px rgba(0, 0, 0, 0.084);
-	z-index: 1;
-}
-
-// HEIGHT ADJUSTMENTS FOR SCROLL SHRINK
-body[is-mobile=true] .tabbedContent {
-	height: calc(100vh - 64px);
-}
-body[is-mobile=false] .tabbedContent {
-	height: calc(100vh - 128px);
-}
-body[is-mobile=true] .untabbedContent {
-	height: 100vh;
-}
-body[is-mobile=false] .untabbedContent {
-	height: calc(100vh - 64px);
-}
-
-
-// HIDE CLOSE BUTTON ON MOBILE
-body[is-mobile=true] #close {
-	display: none;
-}
-
-// CUSTOM SCROLLBARS
-::-webkit-scrollbar {
-	width: 16px;
-}
-::-webkit-scrollbar-button {
-	display: none;
-}
-::-webkit-scrollbar-track {
-	background-color: transparent;
-}
-::-webkit-scrollbar-thumb {
-	background-color: rgba(0, 0, 0, 0.3);
-	border: 4px solid transparent;
-	background-clip: content-box;
-}

@@ -4,8 +4,11 @@
         <meta charset="UTF-8">
 		<!-- MATERIAL DESIGN -->
 		<link rel="stylesheet" href="css/angular-material.css">
-		<!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="css/fixes.css">
+		<!-- OTHER CSS -->
         <link rel="stylesheet" type="text/css" href="css/fonts-import.css">
+        <link rel="stylesheet" type="text/css" href="css/lowlevel.css">
+        <link rel="stylesheet" type="text/css" href="css/animations.css">
         <link rel="stylesheet" type="text/css" href="css/main.css">
         <link rel="stylesheet" type="text/css" href="css/desktop-only.css" id="desktopStylesheet">
         <link rel="stylesheet" type="text/css" href="css/mobile-only.css" id="mobileStylesheet">
@@ -72,13 +75,13 @@
 			
 			<!-- MAIN CONTENT, INCLUDING TABS -->
 			<md-content id="tabContainer">
-				<md-tabs class="md-primary md-whiteframe-z1" md-stretch-tabs="always" md-swipe-content md-no-disconnect md-selected="0">
+				<md-tabs class="md-primary md-whiteframe-z1" md-selected="0" md-stretch-tabs="always" md-swipe-content md-no-disconnect>
 					<!-- CONVERSATION -->
 					<md-tab label="conversation" md-active="connectListeners()">
 						<md-content layout-padding class="tabbedContent">
-							<md-card class="item" ng-repeat="x in topics">
+							<md-card class="topic-item" ng-repeat="x in topics">
 								<md-card-content>
-									{{ x }}
+									{{ x.name }}
 								</md-card-content>
 							</md-card>
 						</md-content>
@@ -86,13 +89,13 @@
 					<!-- AGENDA -->
 					<md-tab label="agenda" md-active="connectListeners()">
 						<md-content layout-padding class="tabbedContent">
-							<md-card class="item" ng-repeat="x in agenda">
+							<md-card class="agenda-item ng-class: itemClass(x)" ng-repeat="x in agenda">
 								<md-card-content>
-									{{ x }}
+									{{ x.name }}
 								</md-card-content>
 							</md-card>
 							
-							<md-button class="md-fab md-bottom-right">
+							<md-button class="md-fab md-fab-bottom-right">
 								<md-icon>open_in_browser</md-icon>
 							</md-button>
 						</md-content>
@@ -123,7 +126,7 @@
 			
 			<!-- CONTENT -->
 			<md-content>
-				<md-button class="md-fab md-bottom md-right">
+				<md-button class="md-fab md-fab-bottom md-right">
 					<md-icon>add</md-icon>
 				</md-button>
 			</md-content>
