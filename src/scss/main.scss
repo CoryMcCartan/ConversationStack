@@ -13,6 +13,33 @@ body {
 .topic-item md-card-content, .agenda-item md-card-content {
 	background-color: #eee;
 }
+// MESSAGE FORMAT WHEN NG_REPEAT IS EMPTY
+.empty-message {
+	font-size: 24px;
+	color: #aaa;
+	padding: 16px;
+	text-align: center;
+	line-height: 1.5;
+	font-weight: 300;
+}
+
+// SEARCH BAR
+.search-bar {
+	margin: 0 16px;
+	top: 3px;
+}
+.search-bar label {
+	padding-left: 8px !important;
+	font-weight: 300;
+}
+.search-bar input {
+	border: none;
+	background-color: rgba(255, 255, 255, 0.2);
+	padding: 4px !important;
+	line-height: 1em;
+	border-radius: 3px;
+}
+
 
 // AGENDA ITEMS MARKED AS DONE
 .item-done {
@@ -23,6 +50,12 @@ body {
 // HIDES VIEWS THAT AREN'T ACTIVE
 .view {
 	display: none;
+}
+
+// STRETCH TO FILL HEIGHT
+.stretch-fill {
+	height: calc(100vh - 64px);
+	box-sizing: border-box;
 }
 
 

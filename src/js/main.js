@@ -24,6 +24,14 @@ Colors = {
 	"help": {
 		primary: "indigo",
 		accent: "grey"
+	},
+	"list": {
+		primary: "grey",
+		accent: "blue"
+	},
+	"edit": {
+		primary: "grey",
+		accent: "blue"
 	}
 };
 
@@ -43,12 +51,10 @@ app.config(function($mdThemingProvider) {
 // controller
 app.controller("mainController", mainController);
 // directives and filters
-app.filter("reverse", function() {
-	return function(items) {
-		return items.slice().reverse();
-	};
-});
 	
+/*
+ * PROGRAM ENTRY POINT
+ */
 function main() {
 	// SET UP MODEL
 	model.onload(SCOPE);
@@ -117,3 +123,19 @@ window.LOGF = function(a) { console.log(a); };
 window.LOGRF = function() { console.log(chrome.runtime.lastError); };
 window.NULLF = function() { };
 document.addEventListener("readystatechange", function() { if (document.readyState === "complete") main(); });
+duplicate = function(from, to) {
+	if (from == null || typeof from != "object") return from;
+	if (from.constructor != Object && from.constructor != Array) return from;
+	if (from.constructor == Date || from.constructor == RegExp || from.constructor == Function ||
+		from.constructor == String || from.constructor == Number || from.constructor == Boolean)
+ 			return new from.constructor(from); 
+
+	to = to || new from.constructor();
+
+	for (var name in from) {
+		to[name] = typeof to[name] == "undefined" ? duplicate(from[name], null) : to[name];
+	}
+
+ 	return to; 
+};
+copyOver = function(to, from) { return duplicate(from, to); };

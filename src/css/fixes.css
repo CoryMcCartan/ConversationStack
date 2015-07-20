@@ -1,5 +1,8 @@
-md-fab {
-  position: fixed; }
+md-card .md-actions {
+  margin: 0 0 -12px 0; }
+
+.md-fab {
+  position: fixed !important; }
 
 md-tabs {
   border-radius: 0; }
@@ -15,6 +18,9 @@ md-sidenav {
 
 md-sidenav md-list md-list-item button.md-no-style {
   font-weight: inherit; }
+
+.ng-hide {
+  display: none; }
 
 md-tabs.md-whiteframe-z2 md-tabs-wrapper {
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.14), 0 4px 5px 0 rgba(0, 0, 0, 0.098), 0 1px 10px 0 rgba(0, 0, 0, 0.084);

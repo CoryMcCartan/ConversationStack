@@ -1,6 +1,11 @@
+// ACTION BUTTON ON CARDS SPACING
+md-card .md-actions {
+	margin: 0 0 -12px 0;
+}
+
 // FIXED POSITION BUTTONS
-md-fab {
-	position: fixed;
+.md-fab {
+	position: fixed !important;
 }
 
 // FIX WEIRD ROUNDING OF TABS
@@ -26,6 +31,11 @@ md-sidenav {
 // BOLD MENU ICONS
 md-sidenav md-list md-list-item button.md-no-style {
 	font-weight: inherit;
+}
+
+// HIDE
+.ng-hide {
+	display: none;
 }
 
 // SHADOW AROUND TABS

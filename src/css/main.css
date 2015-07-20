@@ -9,11 +9,38 @@ body {
 .topic-item md-card-content, .agenda-item md-card-content {
   background-color: #eee; }
 
+.empty-message {
+  font-size: 24px;
+  color: #aaa;
+  padding: 16px;
+  text-align: center;
+  line-height: 1.5;
+  font-weight: 300; }
+
+.search-bar {
+  margin: 0 16px;
+  top: 3px; }
+
+.search-bar label {
+  padding-left: 8px !important;
+  font-weight: 300; }
+
+.search-bar input {
+  border: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 4px !important;
+  line-height: 1em;
+  border-radius: 3px; }
+
 .item-done {
   text-decoration: line-through;
   color: #aaa; }
 
 .view {
   display: none; }
+
+.stretch-fill {
+  height: calc(100vh - 64px);
+  box-sizing: border-box; }
 
 /*# sourceMappingURL=main.css.map */

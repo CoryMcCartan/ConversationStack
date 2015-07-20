@@ -48,7 +48,7 @@ function scrollListeners() {
 
 function closeApp() {
 	openView("CLOSE"); // do any view-specific cleanup
-	model.saveAllData(); // save all our data
+	model.onClose(); // save all our data
 	chrome.app.window.current().close();
 }
 
@@ -120,13 +120,18 @@ function menuTouch(e) {
 	}
 }
 
-function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
+function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast, $mdDialog) {
 	$scope.topics = model.topics;
 	$scope.agenda = model.agenda;
 	$scope.settings = model.settings;
-	
+	$scope.planned = model.planned;
+	$scope.history = model.history;
+
+	$scope.activeEdit = {};
+	$scope.editOrCreate = "create";
+
 	$scope.openView = $mdUtil.debounce(function(name) {
-		// take care of any UI changes
+		 // take care of any UI changes
 		switch(UI.current) {
 			case "main":
 			case "plan":
@@ -135,7 +140,11 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
 				break;
 			case "settings":
 				model.saveSettings();
+				toast("Settings saved.");
 				break;
+			case "edit":
+				$scope.activeEdit = create.ActiveEdit();
+		 		break;
 		}
 		if (name === "CLOSE") { // if we're just closing the app don't bother changing views
 			return;
@@ -150,6 +159,41 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
 		$scope.openView(UI.view.pop());
 	};
 	
+	$scope.saveEdit = function() {
+		if ($scope.editOrCreate === "create") {
+			model.addAgenda($scope.activeEdit);
+		} else {
+			model.updateAgenda($scope.activeEdit);
+		}
+		$scope.back();
+	};
+	$scope.editAgenda = function(item) {
+		$scope.activeEdit = item;
+		$scope.editOrCreate = "edit";
+		$scope.openView("edit");
+	};
+	$scope.createAgenda = function() {
+		$scope.activeEdit = create.ActiveEdit();
+		$scope.editOrCreate = "create";
+		$scope.openView("edit");
+	};
+	$scope.deleteAgenda = function(item) {
+		model.removeAgenda(item);
+		toast("Agenda deleted.", "undo", function() {
+			model.addAgenda(item);
+		});
+	};
+	$scope.loadAgenda = function(agenda) {
+		model.loadAgenda(agenda.items);
+		$scope.back();
+	};
+	$scope.deleteConversation = function(item) {
+		model.removeConversation(item);
+		toast("Conversation deleted.", "undo", function() {
+			model.addConversation(item);
+		});
+	};
+
 	// toggle menu display on button click
 	$scope.openMenu = $mdUtil.debounce(function() {
 		$mdSidenav("menu").open();
@@ -184,11 +228,25 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
 		return item.done ? "item-done" : "";
 	};
 
-	$scope.toast = function(text, action) {
+	$scope.deleteAllData = function() {
+		$mdDialog.show(
+			$mdDialog.confirm()
+				.title("Confirm Delete")
+				.content("Are you sure you want to delete all of your data?")
+				.ok("Yes")
+				.cancel("No")
+		).then(function() {
+			model.clearAllData();
+			toast("All data deleted.");
+		});
+	}
+
+	var toast = function(text, action, callback) {
 		var toast = $mdToast.simple();
 		toast.content(text);
 		if (action) toast.action(action);
-		$mdToast.show(toast);	
+		callback = callback || NULLF;
+		$mdToast.show(toast).then(callback);	
 	};
 	
 	$scope.isMobile = $mdMedia("sm"); // TODO replace with actual check for mobile (maybe from mobile.manifest.json)
@@ -196,10 +254,17 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast) {
 	window.openSideMenu = $scope.openMenu;
 	window.closeSideMenu = $scope.closeMenu;
 	window.openView = $scope.openView;
-	window.toast = $scope.toast;
 	window.MOBILE = $scope.isMobile;
 	window.SCOPE = $scope;
 }
+
+create.ActiveEdit = function() {
+	return {
+		title: '',
+		text: '', 
+		date: Date.now()
+	};
+};
 
 
 // UI EVENT THROTTLER
