@@ -28,26 +28,26 @@
 						<md-divider></md-divider>
 
 					<md-list-item ng-click="openView('main')" ng-style="styleCurrentView('main')">
-						<md-icon ng-style="getColor('main')">forum</md-icon>
+						<md-icon ng-style="{color: getColor('main')}">forum</md-icon>
 						<p>Talk</p>
 					</md-list-item>
 					<md-list-item ng-click="openView('plan')" ng-style="styleCurrentView('plan')">
-						<md-icon ng-style="getColor('plan')">list</md-icon>
+						<md-icon ng-style="{color: getColor('plan')}">list</md-icon>
 						<p>Plan</p>
 					</md-list-item>
 					<md-list-item ng-click="openView('review')" ng-style="styleCurrentView('review')">
-						<md-icon ng-style="getColor('review')">history</md-icon>
+						<md-icon ng-style="{color: getColor('review')}">history</md-icon>
 						<p>Review</p>
 					</md-list-item>
 
 						<md-divider></md-divider>
 
 					<md-list-item ng-click="openView('settings')" ng-style="styleCurrentView('settings')">
-						<md-icon ng-style="getColor('settings')">settings</md-icon>
+						<md-icon ng-style="{color: getColor('settings')}">settings</md-icon>
 						<p>Settings</p>
 					</md-list-item>
 					<md-list-item ng-click="openView('help')" ng-style="styleCurrentView('help')">
-						<md-icon ng-style="getColor('help')">help</md-icon>
+						<md-icon ng-style="{color: getColor('help')}">help</md-icon>
 						<p>Help and Feedback</p>
 					</md-list-item>
 				</md-list>
@@ -123,10 +123,9 @@
 					</md-button>
 
 					<h2 id="appTitle" class="draggable">Plan</h2>
-					<span class="draggable" style="height: 100%" flex></span> <!--fills up space between L and R of screen -->
+					<span class="draggable" style="height: 100%" flex="{{ searching ? '0' : '1' }}"></span> <!--fills up space between L and R of screen -->
 					<md-input-container md-no-float flex class="search-bar">
-						<label>Search</label>
-						<input type="text" ng-model="planSearch" />
+						<input type="text" ng-model="planSearch" placeholder="Search" ng-focus="searching = true" ng-blur="searching = false" />
 					</md-input-container>
 
 					<md-button class="md-icon-button" id="close">
@@ -179,10 +178,9 @@
 					</md-button>
 
 					<h2 id="appTitle" class="draggable">Review</h2>
-					<span class="draggable" style="height: 100%" flex></span> <!--fills up space between L and R of screen -->
-					<md-input-container md-no-float flex class="search-bar">
-						<label>Search</label>
-						<input type="text" ng-model="reviewSearch" />
+					<span class="draggable" style="height: 100%" flex="{{ searching ? '0' : '1' }}"></span> <!--fills up space between L and R of screen -->
+					<md-input-container md-no-float flex class="search-bar dark">
+						<input type="text" ng-model="reviewSearch" placeholder="Search" ng-focus="searching = true" ng-blur="searching = false" />
 					</md-input-container>
 
 					<md-button class="md-icon-button" id="close">
@@ -282,10 +280,9 @@
 					</md-button>
 						
 					<h2 id="appTitle" class="draggable">Open Agenda</h2>
-					<span class="draggable" style="height: 100%" flex></span>
-					<md-input-container md-no-float flex class="search-bar">
-						<label>Search</label>
-						<input type="text" ng-model="loadSearch" />
+					<span class="draggable" style="height: 100%" flex="{{ searching ? '0' : '1' }}"></span>
+					<md-input-container md-no-float flex class="search-bar dark">
+						<input type="text" ng-model="loadSearch" placeholder="Search" ng-focus="searching = true" ng-blur="searching = false" />
 					</md-input-container>
 
 					<md-button class=md-icon-button" id="close">
@@ -333,13 +330,13 @@
 					<input ng-model="activeEdit.title">
 				</md-input-container>
 				<md-input-container flex md-no-float>
-					<label>Agenda</label>
-					<textarea ng-model="activeEdit.text"></textarea>
+					<textarea ng-model="activeEdit.text" placeholder="Agenda"></textarea>
 				</md-input-container>
 			</md-content>
 		</section>
 		
 		<!-- JS -->
+        <script type="text/javascript" src="js/sound.js"></script>
         <script type="text/javascript" src="js/model.js"></script>
         <script type="text/javascript" src="js/controller.js"></script>
         <script type="text/javascript" src="js/angular.min.js"></script>

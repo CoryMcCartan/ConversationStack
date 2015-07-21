@@ -25,19 +25,32 @@ body {
 
 // SEARCH BAR
 .search-bar {
-	margin: 0 16px;
-	top: 3px;
+	margin: 0 0 0 16px;
+	height: 36px;
+	padding-bottom: 0;
+	
+	input {
+		border: none;
+		background-color: rgba(255, 255, 255, 0.2);
+		padding: 4px !important;
+		line-height: 1em;
+		border-radius: 3px;
+	}
+	input::-webkit-input-placeholder {
+		color: #eee;
+		font-weight: 300;
+		padding: 2px 4px;
+	}
 }
-.search-bar label {
-	padding-left: 8px !important;
-	font-weight: 300;
+.search-bar.dark input::-webkit-input-placeholder {
+	color: #444;
 }
-.search-bar input {
-	border: none;
-	background-color: rgba(255, 255, 255, 0.2);
-	padding: 4px !important;
-	line-height: 1em;
-	border-radius: 3px;
+.search-bar.md-input-focused {
+	height: 36px;
+	
+	input {
+		background-color: rgba(255, 255, 255, 0.4);
+	}
 }
 
 

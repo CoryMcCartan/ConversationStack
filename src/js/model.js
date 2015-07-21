@@ -10,10 +10,13 @@ model = (function() {
 	var agenda = [];
 	var history = [];
 	var planned = [];
-	var agendaPtr = -1;
+	var agendaPtr = 0;
 	
 	var pushTopic = function(topic) {
 		topics.unshift(create.Topic(topic));
+		if (topic === agenda[agendaPtr].name) { // talking about next item on agenda
+			popAgendaItem();
+		}
 		scope.$apply();
 	};
 	var popTopic = function() {
@@ -26,7 +29,7 @@ model = (function() {
 		scope.$apply();
 	};
 	var popAgendaItem = function() {
-		var item = agenda[++agendaPtr];
+		var item = agenda[agendaPtr++];
 		item.done = true;
 		scope.$apply();
 		return item;
@@ -62,7 +65,7 @@ model = (function() {
 		for (i = 0; i < l; i++) {
 			agenda.push(_agenda[i]);
 		} 
-		agendaPtr = -1;
+		agendaPtr = 0;
 	};
 	var removeAgenda = function(_agenda) {
 		var oldplanned = planned.slice();
@@ -71,11 +74,11 @@ model = (function() {
 		}
 		for (var i = 0; i < oldplanned.length; i++) {
 			var item = oldplanned[i];
-			if (item.date != _agenda.date) {
-				planned.push(item)
+			if (item.date !== _agenda.date) {
+				planned.push(item);
 			}
 		}
-	}
+	};
 	var loadConversation = function(_topics) {
 		var l = topics.length;
 		for (var i = 0; i < l; i++) {
@@ -97,8 +100,8 @@ model = (function() {
 		}
 		for (var i = 0; i < oldhistory.length; i++) {
 			var item = oldhistory[i];
-			if (item.date != _c.date) {
-				history.push(item)
+			if (item.date !== _c.date) {
+				history.push(item);
 			}
 		}
 	};
@@ -109,11 +112,27 @@ model = (function() {
 		syncData: true
 	};
 	var didSyncData;
-	var saveAllData = function() {
-		storage.save("settings", settings);
-		storage.save("planned", planned);
-		storage.save("history", history);
-		storage.saveLocal("syncData", settings.syncData);
+	var saveAllData = function(callback) {
+		var saveStack = [
+			function() { 
+				storage.save("settings", settings); 
+				saveStack.shift()();
+			},
+			function() { 
+				storage.save("planned", planned); 
+				saveStack.shift()();
+			},
+			function() { 
+				storage.save("history", history);
+				saveStack.shift()();
+			},
+			function() { 
+				storage.saveLocal("syncData", settings.syncData);
+				saveStack.shift()();
+			},
+			callback
+		];
+		saveStack.shift()();
 	};
 	var saveSettings = function() {
 		if (didSyncData !== settings.syncData) {
@@ -128,12 +147,12 @@ model = (function() {
 	var clearAllData = function() {
 		storage.clearAll(settings.syncData ? "sync" : "local");
 	};
-	var onClose = function() {
+	var onClose = function(callback) {
 		if (topics.length) {
 			var item = create.HistoryItem(topics); // save conversation if it exists
 			history.push(item);
 		}
-		saveAllData();
+		saveAllData(callback);
 	};
 	
 	/*
@@ -168,6 +187,7 @@ model = (function() {
 	exports.addConversation = addConversation;
 	exports.onload = onload;
 	exports.settings = settings;
+	exports.clearAllData = clearAllData;
 	exports.saveSettings = saveSettings;
 	exports.onClose = onClose;
 	

@@ -16,6 +16,7 @@
 	"minimum_chrome_version": "25",
 	
 	"permissions": [
-		"storage"
+		"storage",
+		"audioCapture"
 	]
 }

@@ -1,7 +1,7 @@
 /*
  * UI EVENTS, SETUP, ETC
  */
-/* global model, Colors */
+/* global model, Colors, chrome */
 
 var UI = {
 	isClosed: true, // whether side menu is closed
@@ -48,8 +48,9 @@ function scrollListeners() {
 
 function closeApp() {
 	openView("CLOSE"); // do any view-specific cleanup
-	model.onClose(); // save all our data
-	chrome.app.window.current().close();
+	model.onClose(function() {
+		chrome.app.window.current().close();
+	}); // save all our data, then close
 }
 
 function scrollShrink(e) {
@@ -210,13 +211,13 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast, $mdDial
 	$scope.styleCurrentView = function(view) {
 		var styleobj = {};
 		if (UI.current === view) {
-			styleobj = $scope.getColor(view);
+			styleobj = {color: $scope.getColor(view)};
 		}
 		return styleobj;
 	};
 	$scope.getColor = function(view) {
-		var ret = {"color": Colors[view].primary};
-		if (view === "review") ret.color = "#ffc107";
+		var ret = Colors[view].primary;
+		if (view === "review") ret = "#ffc107";
 		return ret;
 	};
 	$scope.getRandomColor = function(index) {

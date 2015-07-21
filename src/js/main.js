@@ -67,17 +67,19 @@ function main() {
  * HELPER FUNCTIONS
  */
 storage = {
-	save: function(key, value) {
+	save: function(key, value, callback) {
 		var storageArea = model.settings.syncData ? chrome.storage.sync : chrome.storage.local;
 		var obj = {};
 		obj[key] = value;
-		storageArea.set(obj, NULLF);
+		callback = callback || NULLF;
+		storageArea.set(obj, callback);
 	},
-	saveLocal: function(key, value) {
+	saveLocal: function(key, value, callback) {
 		var storageArea = chrome.storage.local;
 		var obj = {};
 		obj[key] = value;
-		storageArea.set(obj, NULLF);
+		callback = callback || NULLF;
+		storageArea.set(obj, callback);
 	},
 	load: function(key, callback, defaultValue) {
 		var storageArea = model.settings.syncData ? chrome.storage.sync : chrome.storage.local;
