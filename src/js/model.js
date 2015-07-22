@@ -13,8 +13,9 @@ model = (function() {
 	var agendaPtr = 0;
 	
 	var pushTopic = function(topic) {
+		topic = topic.trim().toLowerCase()
 		topics.unshift(create.Topic(topic));
-		if (agendaPtr && topic === agenda[agendaPtr].name) { // talking about next item on agenda
+		if (agenda.length && topic === agenda[agendaPtr].name.toLowerCase()) { // talking about next item on agenda
 			popAgendaItem();
 		}
 		scope.$apply();
@@ -63,6 +64,7 @@ model = (function() {
 		}
 		l = _agenda.length;
 		for (i = 0; i < l; i++) {
+			_agenda[i].done = false;
 			agenda.push(_agenda[i]);
 		} 
 		agendaPtr = 0;

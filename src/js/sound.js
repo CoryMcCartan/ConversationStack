@@ -3,6 +3,8 @@ listener = (function() {
 	recognition.continuous = true;
 	
 	window.TRANSCRIPT = "";
+
+	var start = function() { recognition.start(); };
 	
 	recognition.onresult = function(e) {
 		var result;
@@ -14,9 +16,7 @@ listener = (function() {
 		model.pushTopic(result);
 	};
 	recognition.onerror = LOGF;
-	recognition.onend = LOGF;
-	
-	var start = function() { recognition.start(); };
+	recognition.onend = start;
 	
 	exports = {};
 	exports.start = start;
