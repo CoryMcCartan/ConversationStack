@@ -60,6 +60,8 @@ function main() {
 	model.onload(SCOPE);
 	// SETUP UI AND CONTROLLER
 	uiSetup();
+	// START LISTENING
+	listener.start();
 }
 
 

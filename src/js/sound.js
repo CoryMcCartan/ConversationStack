@@ -5,11 +5,16 @@ listener = (function() {
 	window.TRANSCRIPT = "";
 	
 	recognition.onresult = function(e) {
+		var result;
 		for (var i = e.resultIndex; i < e.results.length; i++) {
-			TRANSCRIPT += e.results[i][0].transcript;
+			result = e.results[i][0].transcript;
 		}
+		TRANSCRIPT += result;
 		console.log(TRANSCRIPT);
+		model.pushTopic(result);
 	};
+	recognition.onerror = LOGF;
+	recognition.onend = LOGF;
 	
 	var start = function() { recognition.start(); };
 	

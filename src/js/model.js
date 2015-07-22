@@ -14,7 +14,7 @@ model = (function() {
 	
 	var pushTopic = function(topic) {
 		topics.unshift(create.Topic(topic));
-		if (topic === agenda[agendaPtr].name) { // talking about next item on agenda
+		if (agendaPtr && topic === agenda[agendaPtr].name) { // talking about next item on agenda
 			popAgendaItem();
 		}
 		scope.$apply();
