@@ -4,6 +4,15 @@ body {
 	font-size: $font-size;
 }
 
+// CARD SIZING
+md-card {
+	max-width: 800px;
+	margin: 16px auto;
+}
+md-card md-card-content {
+	border-radius: 2px;
+}
+
 // ITEMS
 .topic-item, .agenda-item {
 	font-size: 44px;
@@ -11,7 +20,7 @@ body {
 	font-weight: 300;
 }
 .topic-item md-card-content, .agenda-item md-card-content {
-	background-color: #eee;
+	background-color: #ddd;
 }
 // MESSAGE FORMAT WHEN NG_REPEAT IS EMPTY
 .empty-message {
@@ -40,6 +49,7 @@ body {
 		color: #eee;
 		font-weight: 300;
 		padding: 2px 4px;
+		text-transform: capitalize;
 	}
 }
 .search-bar.dark input::-webkit-input-placeholder {
@@ -58,6 +68,7 @@ body {
 .item-done {
   text-decoration: line-through;
   color: #aaa;
+  background-color: #eee;
 }
 
 // HIDES VIEWS THAT AREN'T ACTIVE
@@ -71,4 +82,14 @@ body {
 	box-sizing: border-box;
 }
 
+// EXTRA SPACE AT BOTTOM
+.spacer {
+	width: 100%;
+	height: 64px;
+}
 
+
+// TOOLTIP CAPITALIZATION
+md-tooltip {
+	text-transform: capitalize;
+}

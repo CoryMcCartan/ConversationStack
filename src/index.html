@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
 		<!-- MATERIAL DESIGN -->
 		<link rel="stylesheet" href="css/angular-material.css">
+		<link rel="stylesheet" href="css/md-colors.min.css">
         <link rel="stylesheet" type="text/css" href="css/fixes.css">
 		<!-- OTHER CSS -->
         <link rel="stylesheet" type="text/css" href="css/fonts-import.css">
@@ -20,6 +21,7 @@
 				<md-list class="md-body-2">
 					<md-list-item>
 						<md-button class="md-icon-button" ng-click="closeMenu()">
+							<md-tooltip md-delay="600">back</md-tooltip>
 							<md-icon>arrow_back</md-icon>
 						</md-button>
 						<p class="md-subhead">conversation-stack</p>
@@ -27,27 +29,27 @@
 
 						<md-divider></md-divider>
 
-					<md-list-item ng-click="openView('main')" ng-style="styleCurrentView('main')">
-						<md-icon ng-style="{color: getColor('main')}">forum</md-icon>
+					<md-list-item ng-click="openView('main')" ng-class="styleCurrentView('main')">
+						<md-icon ng-class="getTextColor('main')">forum</md-icon>
 						<p>Talk</p>
 					</md-list-item>
-					<md-list-item ng-click="openView('plan')" ng-style="styleCurrentView('plan')">
-						<md-icon ng-style="{color: getColor('plan')}">list</md-icon>
+					<md-list-item ng-click="openView('plan')" ng-class="styleCurrentView('plan')">
+						<md-icon ng-class="getTextColor('plan')">list</md-icon>
 						<p>Plan</p>
 					</md-list-item>
-					<md-list-item ng-click="openView('review')" ng-style="styleCurrentView('review')">
-						<md-icon ng-style="{color: getColor('review')}">history</md-icon>
+					<md-list-item ng-click="openView('review')" ng-class="styleCurrentView('review')">
+						<md-icon ng-class="getTextColor('review')">history</md-icon>
 						<p>Review</p>
 					</md-list-item>
 
 						<md-divider></md-divider>
 
-					<md-list-item ng-click="openView('settings')" ng-style="styleCurrentView('settings')">
-						<md-icon ng-style="{color: getColor('settings')}">settings</md-icon>
+					<md-list-item ng-click="openView('settings')" ng-class="styleCurrentView('settings')">
+						<md-icon ng-class="getTextColor('settings')">settings</md-icon>
 						<p>Settings</p>
 					</md-list-item>
-					<md-list-item ng-click="openView('help')" ng-style="styleCurrentView('help')">
-						<md-icon ng-style="{color: getColor('help')}">help</md-icon>
+					<md-list-item ng-click="openView('help')" ng-class="styleCurrentView('help')">
+						<md-icon ng-class="getTextColor('help')">help</md-icon>
 						<p>Help and Feedback</p>
 					</md-list-item>
 				</md-list>
@@ -61,6 +63,7 @@
 			<md-toolbar class="md-primary">
 				<div class="md-toolbar-tools">
 					<md-button id="menuButton" class="md-icon-button" ng-click="openMenu()">
+						<md-tooltip md-delay="1000">menu</md-tooltip>
 						<md-icon>menu</md-icon>
 					</md-button>
 
@@ -68,6 +71,7 @@
 					<span class="draggable" style="height: 100%" flex></span> <!--fills up space between L and R of screen -->
 
 					<md-button class="md-icon-button" id="close">
+						<md-tooltip md-delay="600">close</md-tooltip>
 						<md-icon>close</md-icon>
 					</md-button>
 				</div>
@@ -75,11 +79,11 @@
 			
 			<!-- MAIN CONTENT, INCLUDING TABS -->
 			<md-content id="tabContainer">
-			<md-tabs class="md-primary md-whiteframe-z1" md-selected="0" 
-				md-stretch-tabs="always" md-swipe-content md-no-disconnect>
+				<md-tabs class="md-primary md-whiteframe-z1" md-selected="selectedTabIndex"
+					md-stretch-tabs="always" md-swipe-content md-no-disconnect>
 					<!-- CONVERSATION -->
 					<md-tab label="conversation" md-active="connectListeners()">
-						<md-content layout-padding class="tabbed-content">
+						<md-content layout-padding class="tabbed-content" ng-class="getBackgroundColor('main')">
 							<md-card class="topic-item" ng-repeat="x in topics">
 								<md-card-content>
 									{{ x.name }}
@@ -119,13 +123,14 @@
 			<md-toolbar class="md-primary md-whiteframe-z1">
 				<div class="md-toolbar-tools">
 					<md-button id="menuButton" class="md-icon-button" ng-click="openMenu()">
+						<md-tooltip md-delay="1000">menu</md-tooltip>
 						<md-icon>menu</md-icon>
 					</md-button>
 
 					<h2 id="appTitle" class="draggable">Plan</h2>
 					<span class="draggable" style="height: 100%" flex="{{ searching ? '0' : '1' }}"></span> <!--fills up space between L and R of screen -->
 					<md-input-container md-no-float flex class="search-bar">
-						<input type="text" ng-model="planSearch" placeholder="Search" ng-focus="searching = true" ng-blur="searching = false" />
+					<input type="text" ng-model="planSearch" placeholder="search" ng-focus="searching = true" ng-blur="searching = false" />
 					</md-input-container>
 
 					<md-button class="md-icon-button" id="close">
@@ -136,22 +141,29 @@
 			
 			<!-- CONTENT -->
 			<md-content layout-padding class="untabbed-content">
-				<md-card class="plan-item" ng-repeat="x in planned | orderBy:'date' | filter: planSearch">
-					<md-card-content>
+				<md-card class="plan-item" ng-repeat="x in planned | orderBy:'-date' | filter: planSearch">
+					<md-card-content class="mdc-bg-green-200">
 						<h2 class="md-title">{{ x.title }}</h2>
 						<ul>
 							<li ng-repeat="y in x.items">
 								{{ y.name }}
-							</li>
+							</li> 
 						</ul>
 						<md-divider></md-divider>
 						<div class="md-actions" layout="row" layout-align="end center">
 							<md-button class="md-icon-button" ng-click="editAgenda(x)">
+								<md-tooltip md-delay="600">edit</md-tooltip>
 								<md-icon>edit</md-icon>
 							</md-button>
+							<md-button class="md-icon-button" ng-click="loadAgenda(x)">
+								<md-tooltip md-delay="600">load</md-tooltip>
+								<md-icon>open_in_browser</md-icon>
+							</md-button>
 							<md-button class="md-icon-button" ng-click="deleteAgenda(x)">
+								<md-tooltip md-delay="600">delete</md-tooltip>
 								<md-icon>delete</md-icon>
 							</md-button>
+							<span flex="isMobile ? 1 : 0"></span>
 						</div>
 					</md-card-content>
 				</md-card>
@@ -174,16 +186,18 @@
 			<md-toolbar class="md-primary md-whiteframe-z1">
 				<div class="md-toolbar-tools">
 					<md-button id="menuButton" class="md-icon-button" ng-click="openMenu()">
+						<md-tooltip md-delay="1000">menu</md-tooltip>
 						<md-icon>menu</md-icon>
 					</md-button>
 
 					<h2 id="appTitle" class="draggable">Review</h2>
 					<span class="draggable" style="height: 100%" flex="{{ searching ? '0' : '1' }}"></span> <!--fills up space between L and R of screen -->
 					<md-input-container md-no-float flex class="search-bar dark">
-						<input type="text" ng-model="reviewSearch" placeholder="Search" ng-focus="searching = true" ng-blur="searching = false" />
+						<input type="text" ng-model="reviewSearch" placeholder="search" ng-focus="searching = true" ng-blur="searching = false" />
 					</md-input-container>
 
 					<md-button class="md-icon-button" id="close">
+						<md-tooltip md-delay="600">close</md-tooltip>
 						<md-icon>close</md-icon>
 					</md-button>
 				</div>
@@ -191,8 +205,8 @@
 
 			<!-- CONTENT -->
 			<md-content layout-padding class="untabbed-content">
-				<md-card class="plan-item" ng-repeat="x in history | orderBy:'date' | filter: reviewSearch track by x.date">
-					<md-card-content>
+				<md-card class="plan-item" ng-repeat="x in history | orderBy:'-date' | filter: reviewSearch track by x.date">
+					<md-card-content class="mdc-bg-amber-200">
 						<h2 class="md-title">{{ x.date | date: 'EEEE, MMMM d' }}</h2>
 						<ul>
 							<li ng-repeat="y in x.items">
@@ -202,8 +216,10 @@
 						<md-divider></md-divider>
 						<div class="md-actions" layout="row" layout-align="end center">
 							<md-button class="md-icon-button" ng-click="deleteConversation(x)">
+								<md-tooltip md-delay="600">delete</md-tooltip>
 								<md-icon>delete</md-icon>
 							</md-button>
+							<span flex="isMobile ? 1 : 0"></span>
 						</div>
 					</md-card-content>
 				</md-card>
@@ -217,6 +233,7 @@
 			<md-toolbar class="md-primary md-whiteframe-z1">
 				<div class="md-toolbar-tools">
 					<md-button id="backButton" class="md-icon-button" ng-click="back()">
+						<md-tooltip md-delay="600">back</md-tooltip>
 						<md-icon>arrow_back</md-icon>
 					</md-button>
 
@@ -224,6 +241,7 @@
 					<span class="draggable" style="height: 100%" flex></span> <!--fills up space between L and R of screen -->
 
 					<md-button class="md-icon-button" id="close">
+						<md-tooltip md-delay="600">close</md-tooltip>
 						<md-icon>close</md-icon>
 					</md-button>
 				</div>
@@ -252,6 +270,7 @@
 			<md-toolbar class="md-primary md-whiteframe-z1">
 				<div class="md-toolbar-tools">
 					<md-button id="backButton" class="md-icon-button" ng-click="back()">
+						<md-tooltip md-delay="600">back</md-tooltip>
 						<md-icon>arrow_back</md-icon>
 					</md-button>
 
@@ -259,6 +278,7 @@
 					<span class="draggable" style="height: 100%" flex></span> <!--fills up space between L and R of screen -->
 
 					<md-button class="md-icon-button" id="close">
+						<md-tooltip md-delay="600">close</md-tooltip>
 						<md-icon>close</md-icon>
 					</md-button>
 				</div>
@@ -276,16 +296,18 @@
 			<md-toolbar class="md-primary md-whiteframe-z1">
 				<div class="md-toolbar-tools">
 					<md-button id="backButton" class="md-icon-button" ng-click="back()">
+						<md-tooltip md-delay="600">back</md-tooltip>
 						<md-icon>arrow_back</md-icon>
 					</md-button>
 						
 					<h2 id="appTitle" class="draggable">Open Agenda</h2>
 					<span class="draggable" style="height: 100%" flex="{{ searching ? '0' : '1' }}"></span>
 					<md-input-container md-no-float flex class="search-bar dark">
-						<input type="text" ng-model="loadSearch" placeholder="Search" ng-focus="searching = true" ng-blur="searching = false" />
+						<input type="text" ng-model="loadSearch" placeholder="search" ng-focus="searching = true" ng-blur="searching = false" />
 					</md-input-container>
 
 					<md-button class=md-icon-button" id="close">
+						<md-tooltip md-delay="600">close</md-tooltip>
 						<md-icon>close</md-icon>
 					</md-button>
 				</div>
@@ -294,7 +316,7 @@
 			<!-- CONTENT -->
 			<md-content>
 				<md-list>
-					<md-list-item ng-repeat="x in planned | orderBy: date | filter: loadSearch" ng-click="loadAgenda(x)">
+					<md-list-item ng-repeat="x in planned | orderBy: '-date' | filter: loadSearch" ng-click="loadAgenda(x)">
 						<span class="md-body-2">{{ x.title }}</span>
 						<md-divider></md-divider>
 					</md-list-item>
@@ -308,6 +330,7 @@
 			<md-toolbar class="md-primary md-whiteframe-z1">
 				<div class="md-toolbar-tools">
 					<md-button id="backButton" class="md-icon-button" ng-click="back()">
+						<md-tooltip md-delay="600">back</md-tooltip>
 						<md-icon>arrow_back</md-icon>
 					</md-button>
 						
@@ -315,9 +338,11 @@
 					<span class="draggable" style="height: 100%" flex></span>
 
 					<md-button class="md-icon-button" ng-click="saveEdit()">
+						<md-tooltip md-delay="600">done</md-tooltip>
 						<md-icon>done</md-icon>
 					</md-button>
 					<md-button class=md-icon-button" id="close">
+						<md-tooltip md-delay="600">close</md-tooltip>
 						<md-icon>close</md-icon>
 					</md-button>
 				</div>

@@ -130,8 +130,11 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast, $mdDial
 
 	$scope.activeEdit = {};
 	$scope.editOrCreate = "create";
+	$scope.selectedTabIndex = 0;
 
 	$scope.openView = $mdUtil.debounce(function(name) {
+		path = name.split("/");
+		name = path[0];
 		 // take care of any UI changes
 		switch(UI.current) {
 			case "main":
@@ -154,6 +157,9 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast, $mdDial
 		$("#view_"+ name).style.display = "block";
 		UI.view.push(UI.current);
 		UI.current = name;
+		if (path[1]) {
+			$scope.selectedTabIndex = path[1] === "conversation" ? 0 : 1;
+		}
 	}, 50);
 	
 	$scope.back = function() { // not debounced because it calls a debounced function
@@ -186,7 +192,8 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast, $mdDial
 	};
 	$scope.loadAgenda = function(agenda) {
 		model.loadAgenda(agenda.items);
-		$scope.back();
+		if (UI.current === "list") $scope.back();
+		if (UI.current === "plan") $scope.openView("main/agenda");
 	};
 	$scope.deleteConversation = function(item) {
 		model.removeConversation(item);
@@ -209,16 +216,17 @@ function mainController($scope, $mdSidenav, $mdUtil, $mdMedia, $mdToast, $mdDial
 	$scope.connectListeners = NULLF;//scrollListeners;
 	
 	$scope.styleCurrentView = function(view) {
-		var styleobj = {};
+		var styleobj = "";
 		if (UI.current === view) {
-			styleobj = {color: $scope.getColor(view)};
+			styleobj = $scope.getTextColor(view);
 		}
 		return styleobj;
 	};
-	$scope.getColor = function(view) {
-		var ret = Colors[view].primary;
-		if (view === "review") ret = "#ffc107";
-		return ret;
+	$scope.getTextColor = function(view) {
+		return "mdc-text-" + Colors[view].primary + "-500";
+	};
+	$scope.getBackgroundColor = function(view) {
+		return "mdc-bg-" + Colors[view].primary + "-300";
 	};
 	$scope.getRandomColor = function(index) {
 		var colors = ["#e77", "#4e8", "#9af", "#fe6", "#bbb"];
