@@ -1,4 +1,4 @@
-/* global storage */
+/* global storage, listener */
 
 model = (function() {
 	var scope = {};
@@ -13,9 +13,14 @@ model = (function() {
 	var agendaPtr = 0;
 	
 	var newTopic = function(topic) {
-		topic = topic.trim().toLowerCase()
-		if (agenda.length && topic === agenda[agendaPtr].name.toLowerCase()) { // talking about next item on agenda
-			finishAgendaItem();
+		topic = topic.trim().toLowerCase();
+		// talking about item on agenda
+		if (agendaPtr < agenda.length) {
+			for (var i = agendaPtr; i < agenda.length; i++) {
+				if (topic === agenda[i].name.toLowerCase()) {
+					finishAgendaItem();
+				}
+			}
 		}
 		for (var i = 0; i < topics.length; i++) {
 			if (topic === topics[i].name) {

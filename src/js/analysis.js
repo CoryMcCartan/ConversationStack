@@ -2,6 +2,8 @@
  * WEB WORKER FOR ANALYSIS OF SPEECH RECOGNITION RESULTS
  */
 
+/* global nlp */
+
 importScripts("nlp.min.js", "levenshtein.js");
 
 var queue = [];
@@ -10,12 +12,12 @@ var agenda = [];
 
 var transcript = "";
 
-var offAgendaRate = 0.25; // what portion of the topic changes will not go to an agenda item
-var returnToDone = 0.05; // what portion of the topic changes will go back to a previously covered item
-var jumpAhead = 0.05; // what portion of the time we skip an item
-
-function analyze(results) {
+function extractTopic(results) {
 	var possibilities = [];
+	
+	var offAgendaRate = 0.25; // what portion of the topic changes will not go to an agenda item
+	var returnToDone = 0.05; // what portion of the topic changes will go back to a previously covered item
+	var jumpAhead = 0.05; // what portion of the time we skip an item
 
 	var L = agenda.length + results.length;
 
@@ -36,7 +38,7 @@ function analyze(results) {
 			}
 		}
 		var pDone = returnToDone * pBaseline / (doneCount / l); // Bayes' theorem update for done items
-		pBaseline *= (1 - returnToDone) / ((l - doneCount) / l); // Bayes
+		if (doneCount) pBaseline *= (1 - returnToDone) / ((l - doneCount) / l); // Bayes
 
 		for (var i = 0; i < l; i++) {
 			var item = agenda[i];
@@ -45,13 +47,13 @@ function analyze(results) {
 				prob = pDone;
 			} else {
 				var offset = i - lastDone;
-				if (offset == 1) { // if next
+				if (offset === 1) { // if next
 					prob = (1 - jumpAhead) * pBaseline / ((l - lastDone) / l); 
 				} else { // if further ahead
 					prob = jumpAhead * pBaseline / ((l - lastDone) / l);
 				}
 			}
-			possibilities.push(create.Possibility(item.name, prob));
+			possibilities.push(create.Possibility(item.name.toLowerCase(), prob));
 		}	
 	}
 
@@ -59,10 +61,10 @@ function analyze(results) {
 	 * GENERATE TOPIC GUESSES FROM RESULTS ALTERNATIVES
 	 */
 	var l = results.length;
-	var pBaseline = offAgendaRate / L; // baseline guess on chance of moving to given speech alternative
+	var pBaseline = offAgendaRate; // baseline guess on chance of moving to given speech alternative
 	for (var i = 0; i < l; i++) {
 		var item = results[i];
-		possibilities.push(create.Possibility(item.transcript, item.confidence * pBaseline));
+		possibilities.push(create.Possibility(item.transcript, item.confidence * pBaseline / (l + i+1))); // i+1 to favor earlier (more confident) results
 	}
 
 	/*
@@ -76,14 +78,7 @@ function analyze(results) {
 	// into single symbols for more accurate comparison
 	possibilities.push(create.Possibility(mlrr, 0.0));
 	for (var i = 0; i <= L; i++) {
-		var text = possibilities[i].text;
-		text = text.replace("th", "@");
-		text = text.replace("ch", "#");
-		text = text.replace("ing", "$");
-		text = text.replace("qu", "%");
-		text = text.replace("ough", "^");
-		text = text.replace("kn", "&");
-		possibilities[i].text = text;
+		possibilities[i].text = phoneticize(possibilities[i].text, false);
 	}
 	mlrr = possibilities.pop().text;
 	var mlrrL = mlrr.length;
@@ -99,20 +94,67 @@ function analyze(results) {
 		}
 	}
 
-	if (bestP > 0.8) {
-		log(bestGuess);
-		transcript += " " + bestGuess.trim();
-	} else {
-		throw new Error("Not confident enough.");
-	}
+	postMessage({
+		type: "newTopic",
+		data: phoneticize(bestGuess, true)
+	});
 }
+
+function process(results) {
+	var toAnalyze = [];
+	var confidence = 0; // average confidence
+	for (var i = 0; i < results.length; i++) {
+		transcript += results[i].transcript + " ";
+		confidence += results[i].confidence / results.length;
+	}
+	
+	nouns = nlp.pos(transcript).nouns();
+	log(JSON.stringify(nouns));
+	var seen = [];
+	for (var j = 0; j < nouns.length; j++) {
+		var word = nouns[j].normalised;
+		var index = seen.indexOf(word);
+		if (index > -1) {
+			toAnalyze[index].confidence *= 1.5; // increased certainty
+		} else {
+			seen.push(word);
+			toAnalyze.push({
+				transcript: word,
+				confidence: confidence				
+			});
+		}
+	}
+	extractTopic(toAnalyze.sort(function(a,b){return a.confidence < b.confidence;}));
+}
+
+function phoneticize(text, toEnglish) {
+	if (toEnglish) {
+		text = text.replace("@", "th");
+		text = text.replace("#", "ch");
+		text = text.replace("$", "ing");
+		text = text.replace("%", "qu");
+		text = text.replace("^", "ough");
+		text = text.replace("&", "kn");
+		text = text.replace("*", "ck");
+	} else {
+		text = text.replace("th", "@");
+		text = text.replace("ch", "#");
+		text = text.replace("ing", "$");
+		text = text.replace("qu", "%");
+		text = text.replace("ough", "^");
+		text = text.replace("kn", "&");
+		text = text.replace("ck", "*");
+	}
+	return text;
+};
+
 
 function manage() {
 	running = true;
 	while (queue.length) {
 		try {
-			analyze(queue.shift());
-		} catch(e) { log(JSON.stringify(e)) }
+			process(queue.shift());
+		} catch(e) { log(JSON.stringify(e)); }
 	}
 	running = false;
 }
@@ -121,7 +163,7 @@ onmessage = function(msg) {
 	msg = msg.data;
 	switch (msg.type) {
 		case "result":
-			queue.push(msg.data)
+			queue.push(JSON.parse(msg.data));
 			if (!running) { // no jobs running yet
 				manage();
 			}
@@ -139,7 +181,7 @@ var create = {
 			probability: p
 		};
 	}
-}
+};
 
 function log(text) {
 	var msg = {

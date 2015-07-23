@@ -1,8 +1,11 @@
+/* global model */
+
 listener = (function() {
 	var recognition = new webkitSpeechRecognition();
 	var analyzer = new Worker("js/analysis.js");
 
 	recognition.continuous = true;
+	recognition.maxAlternatives = 5;
 	
 	window.TRANSCRIPT = "";
 
@@ -20,7 +23,7 @@ listener = (function() {
 			result = e.results[i][0].transcript;
 			analyzer.postMessage({
 				type: "result",
-				data: e.results[i]
+				data: stringify(e.results[i])
 			});
 		}
 		TRANSCRIPT += result;
@@ -50,6 +53,17 @@ listener = (function() {
 			type: "agenda",
 			data: model.agenda
 		});
+	};
+	
+	var stringify = function(obj) {
+		var ret = [];
+		for (var i = 0; i < obj.length; i++) {
+			ret.push({
+				confidence: obj[i].confidence,
+				transcript: obj[i].transcript
+			});
+		}
+		return JSON.stringify(ret);
 	};
 	
 	exports = {};
