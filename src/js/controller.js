@@ -49,6 +49,7 @@ function scrollListeners() {
 function closeApp() {
 	openView("CLOSE"); // do any view-specific cleanup
 	model.onClose(function() {
+		listener.stop(); // terminate web worker and speech recognition
 		chrome.app.window.current().close();
 	}); // save all our data, then close
 }

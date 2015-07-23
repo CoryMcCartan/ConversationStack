@@ -12,26 +12,31 @@ model = (function() {
 	var planned = [];
 	var agendaPtr = 0;
 	
-	var pushTopic = function(topic) {
+	var newTopic = function(topic) {
 		topic = topic.trim().toLowerCase()
-		topics.unshift(create.Topic(topic));
 		if (agenda.length && topic === agenda[agendaPtr].name.toLowerCase()) { // talking about next item on agenda
-			popAgendaItem();
+			finishAgendaItem();
 		}
+		for (var i = 0; i < topics.length; i++) {
+			if (topic === topics[i].name) {
+				// pop off all below
+				for (var j = 0; j <= i; j++) {
+					topics.shift();
+				}
+				break;
+			}
+		}
+		topics.unshift(create.Topic(topic));
 		scope.$apply();
-	};
-	var popTopic = function() {
-		var r = topics.shift().name;
-		scope.$apply();
-		return r;
 	};
 	var pushAgendaItem = function(item){
 		agenda.push(create.AgendaItem(item));
 		scope.$apply();
 	};
-	var popAgendaItem = function() {
+	var finishAgendaItem = function() {
 		var item = agenda[agendaPtr++];
 		item.done = true;
+		listener.updateAnalyzer(); // update the analyzer
 		scope.$apply();
 		return item;
 	};
@@ -68,6 +73,7 @@ model = (function() {
 			agenda.push(_agenda[i]);
 		} 
 		agendaPtr = 0;
+		listener.updateAnalyzer(); // update the bg analyzer with the agenda for better voice recognition
 	};
 	var removeAgenda = function(_agenda) {
 		var oldplanned = planned.slice();
@@ -176,10 +182,9 @@ model = (function() {
 	exports.agenda = agenda;
 	exports.history = history;
 	exports.planned = planned;
-	exports.pushTopic = pushTopic;
-	exports.popTopic = popTopic;
+	exports.newTopic = newTopic;
 	exports.pushAgendaItem = pushAgendaItem;
-	exports.popAgendaItem = popAgendaItem;
+	exports.finishAgendaItem = finishAgendaItem;
 	exports.addAgenda = addAgenda;
 	exports.updateAgenda = updateAgenda;
 	exports.removeAgenda = removeAgenda;
