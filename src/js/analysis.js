@@ -2,9 +2,9 @@
  * WEB WORKER FOR ANALYSIS OF SPEECH RECOGNITION RESULTS
  */
 
-/* global nlp */
+/* global nlp, NLP, Metaphone */
 
-importScripts("nlp.min.js", "levenshtein.js");
+importScripts("nlp.min.js", "natural.js", "pos.js");
 
 var queue = [];
 var running = false;
@@ -12,14 +12,22 @@ var agenda = [];
 
 var transcript = "";
 
+var tagger = new POSTagger();
+var lexer = new Lexer();
+var nounInflector = new NLP.NounInflector();
+var tfIdf = new NLP.TfIdf();
+var tfidf_ptr = 0;
+
 function extractTopic(results) {
 	var possibilities = [];
+    var keywords = [];
 	
 	var offAgendaRate = 0.25; // what portion of the topic changes will not go to an agenda item
 	var returnToDone = 0.05; // what portion of the topic changes will go back to a previously covered item
 	var jumpAhead = 0.05; // what portion of the time we skip an item
 
-	var L = agenda.length + results.length;
+	var pL = agenda.length;
+	var kL = results.length;
 
 	/*
 	 * GENERATE TOPIC GUESSES FROM AGENDA
@@ -28,7 +36,7 @@ function extractTopic(results) {
 	if (l === 0) { // if no agenda, every new topic will be off agenda
 		offAgendaRate = 1;
 	} else {
-		var pBaseline = (1 - offAgendaRate) / L; // baseline guess on chance of moving to any given agenda item
+		var pBaseline = (1 - offAgendaRate) / pL; // baseline guess on chance of moving to any given agenda item
 		var doneCount = 0;
 		var lastDone = -1;
 		for (var i = 0; i < l; i++) {
@@ -53,7 +61,8 @@ function extractTopic(results) {
 					prob = jumpAhead * pBaseline / ((l - lastDone) / l);
 				}
 			}
-			possibilities.push(create.Possibility(item.name.toLowerCase(), prob));
+            var text = nounInflector.singularize(item.name.toLowerCase());
+			possibilities.push(create.Possibility(text, prob));
 		}	
 	}
 
@@ -64,90 +73,129 @@ function extractTopic(results) {
 	var pBaseline = offAgendaRate; // baseline guess on chance of moving to given speech alternative
 	for (var i = 0; i < l; i++) {
 		var item = results[i];
-		possibilities.push(create.Possibility(item.transcript, item.confidence * pBaseline / (l + i+1))); // i+1 to favor earlier (more confident) results
+        var text = item.transcript.toLowerCase();
+		keywords.push(create.Possibility(text, item.confidence * pBaseline / l)); 
 	}
 
 	/*
 	 * EVALUATE POSSIBLIITES
 	 */
 	var bestP = 0.0;
-	var bestGuess = "";
-	var mlrr = results[0].transcript; // Most Likely Recognition Result
-	var mlrc = results[0].confidence; // Most Likely Result Confidence
-	// try to reduce problems by combining letter combinations like th and ing
-	// into single symbols for more accurate comparison
-	possibilities.push(create.Possibility(mlrr, 0.0));
-	for (var i = 0; i <= L; i++) {
-		possibilities[i].text = phoneticize(possibilities[i].text, false);
-	}
-	mlrr = possibilities.pop().text;
-	var mlrrL = mlrr.length;
+	var bestGuess = keywords[0].text;
 	// find best match
-	for (var i = 0; i < L; i++) { // for each possibility
-		var p = possibilities[i];
-		var distance = new Levenshtein(mlrr, p.text).distance;
-		var maxD = Math.max(mlrrL, p.text.length);
-		var prob = mlrc * p.probability * (1 - (distance / maxD));
-		if (prob > bestP) {
-			bestP = prob;
-			bestGuess = p.text;
-		}
-	}
+    for (var k = 0; k < kL; k++) { // for each keyword
+        var mlrr = NLP.Metaphone(keywords[i].text);
+        var mlrc = keywords[i].probability;
+        for (var i = 0; i < pL; i++) { // for each possibility
+            var p = possibilities[i];
+            var distance = NLP.LevenshteinDistance(mlrr, NLP.Metaphone.process(p.text));
+            var maxD = Math.max(mlrr.length, p.text.length);
+            var prob = mlrc * p.probability * (1 - (distance / maxD));
+            if (prob > bestP) {
+                bestP = prob;
+                bestGuess = p.text;
+            }
+        }
+    }
 
-	postMessage({
-		type: "newTopic",
-		data: phoneticize(bestGuess, true)
-	});
+	return bestGuess;
 }
 
 function process(results) {
-	var toAnalyze = [];
-	var confidence = 0; // average confidence
-	for (var i = 0; i < results.length; i++) {
-		transcript += results[i].transcript + " ";
-		confidence += results[i].confidence / results.length;
-	}
-	
-	nouns = nlp.pos(transcript).nouns();
-	log(JSON.stringify(nouns));
-	var seen = [];
-	for (var j = 0; j < nouns.length; j++) {
-		var word = nouns[j].normalised;
-		var index = seen.indexOf(word);
-		if (index > -1) {
-			toAnalyze[index].confidence *= 1.5; // increased certainty
-		} else {
-			seen.push(word);
-			toAnalyze.push({
-				transcript: word,
-				confidence: confidence				
-			});
-		}
-	}
-	extractTopic(toAnalyze.sort(function(a,b){return a.confidence < b.confidence;}));
+    transcript += " " + results[0].transcript;
+    var resolved = resolveCoreferences(transcript).trim();
+    var keywords = getNouns(resolved);
+    var possibilities = getFrequencies(keywords);
+    var topic = extractTopic(possibilities);
+    postMessage({
+		type: "newTopic",
+		data: topic
+	});
 }
 
-function phoneticize(text, toEnglish) {
-	if (toEnglish) {
-		text = text.replace("@", "th");
-		text = text.replace("#", "ch");
-		text = text.replace("$", "ing");
-		text = text.replace("%", "qu");
-		text = text.replace("^", "ough");
-		text = text.replace("&", "kn");
-		text = text.replace("*", "ck");
-	} else {
-		text = text.replace("th", "@");
-		text = text.replace("ch", "#");
-		text = text.replace("ing", "$");
-		text = text.replace("qu", "%");
-		text = text.replace("ough", "^");
-		text = text.replace("kn", "&");
-		text = text.replace("ck", "*");
-	}
-	return text;
-};
+function getFrequencies(keywords) {
+    tfIdf.addDocument(keywords);
+    var terms = tfIdf.listTerms(tfidf_ptr++);
+    var freq = [];
+    var l = terms.length;
+    var sum = 0.0;
+    for (var i = 0; i < l; i++) {
+        sum += terms[i].tfidf;
+    }
+    for (var i = 0; i < l; i++) {
+        freq.push({
+            transcript: terms[i].term,
+            confidence: terms[i].tfidf / sum
+        });
+    }
+    return freq;
+}
 
+function getNouns(text) {
+    var words = lexer.lex(text);
+    var nwords = words.length;
+    var nouns = "";
+    
+    for (var i = 0; i < nwords; i++) {
+        var word = words[i];
+        var pos = getPOS(word);
+        if (pos.slice(0,2) === "NN") { // is a noun
+            nouns += nounInflector.singularize(word) + " ";
+        }
+    }
+    
+    return nouns;
+}
+
+function resolveCoreferences(text) {
+    var words = lexer.lex(text);
+    var nwords = words.length;
+    // for each word
+    for (var i = 0; i < nwords; i++) {
+        word = words[i];
+        
+        var singular = false;
+        
+        switch (word.toLowerCase()) {
+            case "it":
+                singular = true;
+                break;
+            case "he":
+                singular = true;
+                break;
+            case "she":
+                singular = true;
+                break;
+            case "they":
+            case "them":
+                singular = false;
+            default:
+                continue; // get another word
+        }
+        // RESOLVE COREFERENCE
+        bestD = nwords; // closest distance to coreference 
+        best = "";
+        for (var j = 0; j < nwords; j++) {
+            if (i === j) continue;
+            var pos = getPOS(words[j]);
+            var d = Math.abs(i - j);
+            if (pos === (singular ? "NN" : "NNS")
+                    || pos === (singular ? "NNP" : "NNPS")
+                    && d < bestD) {
+                best = words[j];
+                bestD = d;
+            }
+            if (j > i && d > bestD) { //we're moving away after getting our best guess
+                break; // no point looping
+            }
+        }
+        if (bestD < nwords) { // something was found
+            words[i] = best; // replace coreference
+        }
+    }
+    
+    return deLex(words);
+}
 
 function manage() {
 	running = true;
@@ -173,6 +221,22 @@ onmessage = function(msg) {
 			break;
 	}
 };
+
+function getPOS(word) {
+    return tagger.tag([word])[0][1];
+}
+function deLex(words) {
+    var dl = "";
+    var l = words.length;
+    for (var i = 0; i < l; i++) {
+        word = words[i];
+        if (word !== ".") {
+            dl += " "
+        }
+        dl += word;
+    }
+    return dl;
+}
 
 var create = {
 	Possibility: function(t, p) {
