@@ -84,8 +84,8 @@ function extractTopic(results) {
 	var bestGuess = keywords[0].text;
 	// find best match
     for (var k = 0; k < kL; k++) { // for each keyword
-        var mlrr = NLP.Metaphone(keywords[i].text);
-        var mlrc = keywords[i].probability;
+        var mlrr = NLP.Metaphone.process(keywords[k].text);
+        var mlrc = keywords[k].probability;
         for (var i = 0; i < pL; i++) { // for each possibility
             var p = possibilities[i];
             var distance = NLP.LevenshteinDistance(mlrr, NLP.Metaphone.process(p.text));
@@ -154,21 +154,20 @@ function resolveCoreferences(text) {
     for (var i = 0; i < nwords; i++) {
         word = words[i];
         
-        var singular = false;
+        var expected = false;
         
         switch (word.toLowerCase()) {
             case "it":
-                singular = true;
+                expected = ["NNS"];
                 break;
             case "he":
-                singular = true;
-                break;
             case "she":
-                singular = true;
+                expected = ["NNP"];
                 break;
             case "they":
             case "them":
-                singular = false;
+                expected = ["NNS", "NNPS"];
+				break;
             default:
                 continue; // get another word
         }
@@ -177,11 +176,14 @@ function resolveCoreferences(text) {
         best = "";
         for (var j = 0; j < nwords; j++) {
             if (i === j) continue;
+			if (j === 0 || words[j-1] === ".") { // start of sentence
+				if (tagger.wordInLexicon(words[j].toLowerCase())) {
+					words[j] = words[j].toLowerCase();
+				}
+			}
             var pos = getPOS(words[j]);
             var d = Math.abs(i - j);
-            if (pos === (singular ? "NN" : "NNS")
-                    || pos === (singular ? "NNP" : "NNPS")
-                    && d < bestD) {
+            if (expected.indexOf(pos) >= 0 && d < bestD) {
                 best = words[j];
                 bestD = d;
             }
