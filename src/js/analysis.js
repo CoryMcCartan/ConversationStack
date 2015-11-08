@@ -158,7 +158,7 @@ function resolveCoreferences(text) {
         
         switch (word.toLowerCase()) {
             case "it":
-                expected = ["NNS"];
+                expected = ["NN"];
                 break;
             case "he":
             case "she":
